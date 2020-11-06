@@ -1,0 +1,13 @@
+Nome, Instagram, Grupo(J, A, I), Sexo(M, F), Valor, Data Pedido, Data Entrega, Pedido(Quantidade-Item1;Quantidade-Item2;...) 
+Obs Pedido: Não usar ; no final se for apenas 1 item independente de quantidade
+
+Itens:
+Brigadeiro 4
+Brigadeiro 6
+Brigadeiro NN 4
+Brigadeiro NN 6
+Brownie G
+Brownie B
+Cento Brigadeiro
+Cento Beijinho
+Panettone
