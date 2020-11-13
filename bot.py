@@ -32,6 +32,7 @@ async def comandos(ctx):
     'ajuda' ou '?' - Exemplo de input
     'itens' - Lista de Itens
     'pedido' ou 'p' (seguido do pedido) - Anotar pedido
+    'remover' ou 'r' (seguido do número do pedido) - Remove pedido do banco de dados
     'tabela' ou 't' - Mostra tabela em string no chat (Não formatada!!!)
     'excel' ou 'xl' - Exporta o banco de dados para excel
     'csv' - Exporta o banco de dados para csv
@@ -58,6 +59,11 @@ async def itens(ctx):
 @client.command(aliases=['p'])
 async def pedido(ctx, *, nota):
     result = managerv2.mainfunction(nota)
+    await ctx.send(result)
+
+@client.command(aliases=['r'])
+async def remover(ctx, num):
+    result = managerv2.remove(num)
     await ctx.send(result)
 
 @client.command(aliases=['t'])
