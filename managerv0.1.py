@@ -6,7 +6,33 @@ connection = sqlite3.connect('cacao.db')
 
 cursor = connection.cursor()
 
-def mainfunction (inp):
+def mainfunction ():
+    # input do usuário
+    inp = input('Nome, Instagram, Grupo(J, A, I), Sexo(M, F), Valor, Data Pedido, Data Entrega, Pedido(Quantidade-Item1;Quantidade-Item2;...): \n')
+    
+    # exit
+    if inp == 'e':
+        print('Exiting & Closing Connection')
+        return connection.close()
+
+    # joins tables and saves to csv
+    if inp == 'csv':
+        df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
+            FROM pedidos
+            INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
+            """, connection)
+        df.to_csv('pedidos.csv', index=False)
+        return mainfunction()
+        
+    if inp == 'xl':
+        df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
+            FROM pedidos
+            INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
+            """, connection)
+        df.to_excel('pedidos.xlsx', sheet_name='Pedidos', index=False)
+        return mainfunction()
+        
+        
     
     # separando input pelas virgulas
     inplist = inp.split(',')
@@ -17,7 +43,8 @@ def mainfunction (inp):
 
     # erro se lista < 8 itens
     if len(inplist) < 8:
-        return 'Faltam argumentos!'
+        print('Faltam argumentos!')
+        return mainfunction()
     
     # add @ se não estiver presente
     if inplist[1][0] != '@':
@@ -84,31 +111,10 @@ def mainfunction (inp):
 
     # commiting & restarting
     commit()
-    close.connection()
-    return 'Pedido anotado!'
+    mainfunction()
     
 def commit():
+    print('commiting')
     connection.commit()
 
-def show():
-    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
-            FROM pedidos
-            INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
-            """, connection)
-    return df.to_string(index=False, show_dimensions=True)
-
-def excel():
-    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
-        FROM pedidos
-        INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
-        """, connection)
-    df.to_excel('pedidos.xlsx', sheet_name='Pedidos', index=False)
-    return 'Exportado para Excel'
-
-def csv():
-    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
-        FROM pedidos
-        INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
-        """, connection)
-    df.to_csv('pedidos.csv', index=False)
-    return 'Exportado para CSV'
+mainfunction()
