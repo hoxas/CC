@@ -2,3 +2,6 @@
 test.py
 *.csv
 *.xlsx
+cacao.db
+__pycache__
+.vscode
