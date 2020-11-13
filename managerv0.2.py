@@ -1,28 +1,13 @@
 import sqlite3, datetime, numpy, openpyxl, pandas as pd
 
 def getYear():
-    try:
-        year = datetime.datetime.now().year
-    except Exception:
-        return 'Error Retrieving Year'
-    else:         
-        return year
-
-def con():
-    connection = sqlite3.connect('cacao.db')
-    cursor = connection.cursor()
-    def commit():
-        try:
-            connection.commit()
-            connection.close()
-        except Exception as e:
-            print(e)
-            return(e)
-    return connection, cursor, commit
+    year = datetime.datetime.now().year
+    return year
 
 def mainfunction (inp):
     year = getYear()
-    connection, cursor, commit = con()
+    connection = sqlite3.connect('cacao.db')
+    cursor = connection.cursor()
 
     # separando input pelas virgulas
     inplist = inp.split(',')
@@ -34,8 +19,7 @@ def mainfunction (inp):
     # erro se lista < 7 itens
     if len(inplist) < 7:
         return 'Faltam argumentos!'
-
-    # com instagram ou 8 parametros
+    
     if len(inplist) == 8:
         # add @ se não estiver presente
         if inplist[1][0] != '@':
@@ -51,17 +35,10 @@ def mainfunction (inp):
             if len(inplist[i]) < 8:
                 inplist[i] = f'{inplist[i]}/{str(year)}'
             i += 1
-        
-        # inserindo na tabela pedidos
-        try:
-            insert = f"INSERT INTO pedidos ('Nome','Instagram','Grupo','Sexo','Valor','Data Pedido','Data Entrega') VALUES ('{inplist[0]}', '{inplist[1]}', '{inplist[2]}', '{inplist[3]}', '{inplist[4]}', '{inplist[5]}', '{inplist[6]}')"
-            cursor.execute(insert)
-        except Exception as e:
-            print(e)
-            return e
 
-        # tirando ; do ultimo item se presente
-        inplist[7] = inplist[7].rstrip(';')
+        # inserindo na tabela pedidos
+        insert = f"INSERT INTO pedidos ('Nome','Instagram','Grupo','Sexo','Valor','Data Pedido','Data Entrega') VALUES ('{inplist[0]}', '{inplist[1]}', '{inplist[2]}', '{inplist[3]}', '{inplist[4]}', '{inplist[5]}', '{inplist[6]}')"
+        cursor.execute(insert)
 
         # separando itens distintos e quantidades
         itenspedidos = inplist[7].split(';')
@@ -91,16 +68,11 @@ def mainfunction (inp):
             else:
                 quantidades += itenspedidos[i][0]
             i += 1
-        
+
         # inserindo itens distintos e suas quantidades na tabela itenspedidos
-        try:
-            insert = f"INSERT INTO itensPedidos ({colunas}) VALUES ({quantidades})"
-            cursor.execute(insert)
-        except Exception as e:
-            print(e)
-            return e
+        insert = f"INSERT INTO itensPedidos ({colunas}) VALUES ({quantidades})"
+        cursor.execute(insert)
     
-    #sem instagram ou 7 parametros
     if len(inplist) == 7:
         # grupo e sexo para maiúsculo
         inplist[1] = inplist[1].upper()
@@ -114,15 +86,8 @@ def mainfunction (inp):
             i += 1
 
         # inserindo na tabela pedidos
-        try:
-            insert = f"INSERT INTO pedidos ('Nome','Grupo','Sexo','Valor','Data Pedido','Data Entrega') VALUES ('{inplist[0]}', '{inplist[1]}', '{inplist[2]}', '{inplist[3]}', '{inplist[4]}', '{inplist[5]}')"
-            cursor.execute(insert)
-        except Exception as e:
-            print(e)
-            return e
-
-        # tirando ; do ultimo item se presente
-        inplist[6] = inplist[6].rstrip(';')
+        insert = f"INSERT INTO pedidos ('Nome','Grupo','Sexo','Valor','Data Pedido','Data Entrega') VALUES ('{inplist[0]}', '{inplist[1]}', '{inplist[2]}', '{inplist[3]}', '{inplist[4]}', '{inplist[5]}')"
+        cursor.execute(insert)
 
         # separando itens distintos e quantidades
         itenspedidos = inplist[6].split(';')
@@ -154,54 +119,59 @@ def mainfunction (inp):
             i += 1
 
         # inserindo itens distintos e suas quantidades na tabela itenspedidos
-        try:
-            insert = f"INSERT INTO itensPedidos ({colunas}) VALUES ({quantidades})"
-            cursor.execute(insert)
-        except Exception as e:
-            print(e)
-            return e
-    
+        insert = f"INSERT INTO itensPedidos ({colunas}) VALUES ({quantidades})"
+        cursor.execute(insert)
+
+    ### printando tabela
+    #cursor.execute("SELECT * FROM pedidos")
+    #results = cursor.fetchall()
+    #print(results)
+
+    #cursor.execute("SELECT * FROM itensPedidos")
+    #results = cursor.fetchall()
+    #print(results)
+
+    # commiting & restarting
     commit()
-    return 'Pedido Anotado!'
+    connection.close()
+    return 'Pedido anotado!'
+    
+def commit():
+    connection.commit()
+
+def show():
+    connection = sqlite3.connect('cacao.db')
+    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
+            FROM pedidos
+            INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
+            """, connection)
+    return df.to_string(index=False, show_dimensions=True)
+
+def excel():
+    connection = sqlite3.connect('cacao.db')
+    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
+        FROM pedidos
+        INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
+        """, connection)
+    df.to_excel('pedidos.xlsx', sheet_name='Pedidos', index=False)
+    return 'Exportado para Excel'
+
+def csv():
+    connection = sqlite3.connect('cacao.db')
+    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
+        FROM pedidos
+        INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
+        """, connection)
+    df.to_csv('pedidos.csv', index=False)
+    return 'Exportado para CSV'
 
 def remove(rowId):
-    connection, cursor, commit = con()
+    connection = sqlite3.connect('cacao.db')
+    cursor = connection.cursor()
     delete = f'DELETE FROM pedidos WHERE id = {rowId};'
     cursor.execute(delete)
     delete2 = f'DELETE FROM itensPedidos WHERE id = {rowId}'
     cursor.execute(delete2)
     commit()
+    connection.close()
     return f'Pedido Número {rowId} removido.'
-
-def show():
-    connection = con()[0]
-    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
-            FROM pedidos
-            INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
-            """, connection)
-    connection.close()
-    return df.to_string(index=False, show_dimensions=True)
-
-def excel():
-    connection = con()[0]
-    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
-        FROM pedidos
-        INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
-        """, connection)
-    connection.close()
-    df.to_excel('pedidos.xlsx', sheet_name='Pedidos', index=False)
-    return 'Exportado para Excel'
-
-def csv():
-    connection = con()[0]
-    df = pd.read_sql("""SELECT pedidos.*, itensPedidos.'Brigadeiro 4', itenspedidos.'Brigadeiro 6', itensPedidos.'Brigadeiro NN 4', itensPedidos.'Brigadeiro NN 6', itensPedidos.'Brownie G', itensPedidos.'Brownie B', itensPedidos.'Cento Brigadeiro', itensPedidos.'Cento Beijinho', itensPedidos.'Panettone' 
-        FROM pedidos
-        INNER JOIN itensPedidos ON pedidos.id = itensPedidos.id;
-        """, connection)
-    connection.close()
-    df.to_csv('pedidos.csv', index=False)
-    return 'Exportado para CSV'
-
-#mainfunction('a,a,m,25,20/05,12/05,1-Brigadeiro 6;2-Brigadeiro 4;')
-#mainfunction('a,a,a,m,25,20/05,12/05,1-Cento Brigadeiro;')
-#mainfunction('a,a,a')
