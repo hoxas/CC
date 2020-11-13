@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import managerv2 as manager
+import manager as manager
 
 client = commands.Bot(command_prefix = '')
 
@@ -40,8 +40,7 @@ async def comandos(ctx):
 
 @client.command(aliases=['?'])
 async def ajuda(ctx):
-    await ctx.send("""Nome, Instagram, Grupo(J, A, I), Sexo(M, F), Valor, Data Pedido, Data Entrega, Pedido(Quantidade-Item1;Quantidade-Item2;...)\n
-Obs Pedido: Não usar ; no final se for apenas 1 item independente de quantidade""")
+    await ctx.send("Nome, Instagram, Grupo(J, A, I), Sexo(M, F), Valor, Data Pedido, Data Entrega, Pedido(Quantidade-Item1;Quantidade-Item2;...)")
 
 @client.command()
 async def itens(ctx):
