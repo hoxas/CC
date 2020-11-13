@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-import managerv2
+import managerv2 as manager
 
 client = commands.Bot(command_prefix = '')
 
@@ -32,6 +32,7 @@ async def comandos(ctx):
     'ajuda' ou '?' - Exemplo de input
     'itens' - Lista de Itens
     'pedido' ou 'p' (seguido do pedido) - Anotar pedido
+    'remover' ou 'r' (seguido do número do pedido) - Remove pedido do banco de dados
     'tabela' ou 't' - Mostra tabela em string no chat (Não formatada!!!)
     'excel' ou 'xl' - Exporta o banco de dados para excel
     'csv' - Exporta o banco de dados para csv
@@ -57,22 +58,27 @@ async def itens(ctx):
 
 @client.command(aliases=['p'])
 async def pedido(ctx, *, nota):
-    result = managerv2.mainfunction(nota)
+    result = manager.mainfunction(nota)
+    await ctx.send(result)
+
+@client.command(aliases=['r'])
+async def remover(ctx, num):
+    result = manager.remove(num)
     await ctx.send(result)
 
 @client.command(aliases=['t'])
 async def tabela(ctx):
-    result = managerv2.show()
+    result = manager.show()
     await ctx.send(result)
 
 @client.command(aliases=['xl'])
 async def excel(ctx):
-    result = managerv2.excel()
+    result = manager.excel()
     await ctx.send(result)
 
 @client.command()
 async def csv(ctx):
-    result = managerv2.csv()
+    result = manager.csv()
     await ctx.send(result)
 
 
