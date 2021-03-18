@@ -82,4 +82,4 @@ async def csv(ctx):
 
 
 
-client.run('Nzc0MDQ0NzI4MDU5NjI1NTAz.X6SDVA.viTpoOC1aATKMsMWNRVU4DXESoU')
+client.run('discordkey')
